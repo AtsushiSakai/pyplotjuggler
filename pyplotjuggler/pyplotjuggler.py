@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from tkinter import messagebox
 
+WINDOW_WIDTH = 400
+WINDOW_HEIGHT = 300
+
 
 class pyplotjuggler(ttk.Frame):
     """pyplotjuggler"""
@@ -27,7 +30,7 @@ class pyplotjuggler(ttk.Frame):
         self.data = None
         self.selected_field = ""
         self.create_widgets()
-        self.root.geometry('400x400')
+        self.root.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT))
 
         # Menu bar setting
         menubar = tk.Menu(root)
@@ -52,7 +55,7 @@ class pyplotjuggler(ttk.Frame):
     def load_file(self):
         """load_file"""
         ftyp = [("CSV", "*.csv")]
-        idir = os.path.abspath(os.path.dirname(__file__))
+        idir = os.path.abspath(os.path.dirname(__file__) + "../")
         fpath = tkinter.filedialog.askopenfilename(
             filetypes=ftyp, initialdir=idir)
 
@@ -62,6 +65,9 @@ class pyplotjuggler(ttk.Frame):
         for i, name in enumerate(self.data.columns):
             self.left.insert(i, name)
             self.left.bind('<<ListboxSelect>>', self.on_select)
+
+        # Setting time slider limit with first key
+        self.time_slider.configure(to=len(self.data.iloc[:, 0]))
 
     def show_about_message(self):
         """show about"""
@@ -88,7 +94,7 @@ class pyplotjuggler(ttk.Frame):
         self.left.pack()
 
         self.time_slider = tk.Scale(
-            length=200, from_=0, to=200, orient=tk.HORIZONTAL)
+            length=WINDOW_WIDTH, from_=0, to=200, orient=tk.HORIZONTAL)
         self.time_slider.pack()
 
         self.bt_new_fig = tk.Button(
@@ -121,7 +127,6 @@ class FigureManager():
         self.plot(self.parent.data[self.parent.selected_field])
 
     def plot(self, data):
-        print("plot")
         if self.x is None:
             self.x = data
             self.ax.plot(self.x)
