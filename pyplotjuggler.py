@@ -29,10 +29,14 @@ class pyplotjuggler(ttk.Frame):
         self.create_widgets()
         self.root.geometry('400x400')
 
+        # Menu bar setting
         menubar = tk.Menu(root)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Load", command=self.load_file)
         menubar.add_cascade(label="File", menu=filemenu)
+        helpmenu = tk.Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="About", command=self.show_about_message)
+        menubar.add_cascade(label="Help", menu=helpmenu)
 
         root.config(menu=menubar)
         root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -58,6 +62,16 @@ class pyplotjuggler(ttk.Frame):
         for i, name in enumerate(self.data.columns):
             self.left.insert(i, name)
             self.left.bind('<<ListboxSelect>>', self.on_select)
+
+    def show_about_message(self):
+        """show about"""
+        msg = """
+        pyplotjuggler
+        by Atsushi Sakai(@Atsushi_twi)
+        Ver. 0.1
+        GitHub:https://github.com/AtsushiSakai/pyplotjuggler
+        """
+        messagebox.showinfo("About", msg)
 
     def on_select(self, evt):
         # Note here that Tkinter passes an event object to onselect()
