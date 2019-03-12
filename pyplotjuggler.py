@@ -14,6 +14,7 @@ import tkinter.filedialog
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import messagebox
 
 
 class pyplotjuggler(ttk.Frame):
@@ -34,6 +35,15 @@ class pyplotjuggler(ttk.Frame):
         menubar.add_cascade(label="File", menu=filemenu)
 
         root.config(menu=menubar)
+        root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        """ on closing widget"""
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            # Close all matplotlib figure
+            for figm in self.figs:
+                plt.close(figm.fig)
+            self.root.destroy()
 
     def load_file(self):
         """load_file"""
