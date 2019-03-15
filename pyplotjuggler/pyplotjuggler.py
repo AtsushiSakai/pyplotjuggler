@@ -8,13 +8,12 @@ author: Atsushi Sakai
 """
 
 import os
+from tkinter import messagebox
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.filedialog
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from tkinter import messagebox
 
 WINDOW_WIDTH = 400
 WINDOW_HEIGHT = 300
@@ -145,30 +144,47 @@ class FigureManager():
             event.ydata=%f' % (event.button, event.x, event.y, event.xdata, event.ydata))
         print(self.fig_num)
         print(self.parent.selected_field)
-        self.set_data(self.parent.data[self.parent.selected_field])
+        self.set_data(self.parent.data[self.parent.selected_field],
+                      self.parent.selected_field)
 
-    def set_data(self, data):
+    def set_data(self, data, field_name):
 
         if self.x is None:
             self.x = data
+            self.x_field_name = field_name
         elif self.y is None:
             self.y = data
+            self.y_field_name = field_name
 
         self.plot()
 
     def plot(self):
+        self.ax.cla()
 
         if self.y is None:
             time = [t for t in range(len(self.x))]
-            self.ax.plot(time, self.x)
+            self.ax.plot(time, self.x, "-r")
+            self.ax.set_xlabel(self.x_field_name)
+            self.ax.grid(True)
+        else:
+            self.ax.plot(self.x, self.y, "-r")
+            self.ax.set_xlabel(self.x_field_name)
+            self.ax.set_ylabel(self.y_field_name)
+            self.ax.grid(True)
 
-        self.ax.grid(True)
         plt.pause(0.01)
 
     def plot_time_line(self, time):
-        self.ax.cla()
-        self.ax.axvline(x=time)
         self.plot()
+        if self.y is None:
+            self.ax.axvline(x=time)
+            self.ax.plot(time, self.x[time], "xk")
+            self.ax.text(time, self.x[time],
+                         '{:.3f}'.format(self.x[time])
+                         + ":" + self.x_field_name)
+        else:
+            self.ax.plot(self.x[time], self.y[time], "xk")
+        plt.pause(0.01)
 
 
 def main():
