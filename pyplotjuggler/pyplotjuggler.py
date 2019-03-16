@@ -2,7 +2,6 @@
 
 Pyplotjuggler
 
-
 author: Atsushi Sakai
 
 """
@@ -27,7 +26,7 @@ class pyplotjuggler(ttk.Frame):
         self.root = root
         self.figs = []
         self.data = None
-        self.selected_field = ""
+        self.selected_fields = []
         self.time = 0
         self.create_widgets()
         self.root.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT))
@@ -42,9 +41,9 @@ class pyplotjuggler(ttk.Frame):
         filemenu.add_command(label="Load", command=self.load_file)
         self.menubar.add_cascade(label="File", menu=filemenu)
         helpmenu = tk.Menu(self.menubar, tearoff=0)
-        helpmenu.add_command(label="About", command=self.show_about_message)
+        helpmenu.add_command(label="About",
+                             command=self.show_about_message)
         self.menubar.add_cascade(label="Help", menu=helpmenu)
-
         self.root.config(menu=self.menubar)
 
     def on_closing(self):
@@ -66,8 +65,8 @@ class pyplotjuggler(ttk.Frame):
 
         # insert data columns
         for i, name in enumerate(self.data.columns):
-            self.left.insert(i, name)
-            self.left.bind('<<ListboxSelect>>', self.on_select)
+            self.field_list.insert(i, name)
+            self.field_list.bind('<<ListboxSelect>>', self.on_select)
 
         # Setting time slider limit with first key
         self.time_slider.configure(to=len(self.data.iloc[:, 0]))
@@ -84,12 +83,13 @@ class pyplotjuggler(ttk.Frame):
 
     def on_select(self, evt):
         """on_select"""
-        # Note here that Tkinter passes an event object to onselect()
         wid = evt.widget
-        index = int(wid.curselection()[0])
-        value = wid.get(index)
-        # print('You selected item %d: "%s"' % (index, value))
-        self.selected_field = value
+
+        self.selected_fields = []
+        for ind in wid.curselection():
+            value = wid.get(int(ind))
+            self.selected_fields.append(value)
+        self.status_bar_str.set("")
 
     def slider_changed(self, event):
         self.time = self.time_slider.get()  # update time
@@ -97,26 +97,69 @@ class pyplotjuggler(ttk.Frame):
         for f in self.figs:
             f.plot_time_line(self.time)
 
+    def clear_selection(self):
+        """clear list"""
+        self.field_list.selection_clear(0, tkinter.END)
+
     def create_widgets(self):
         """create_widgets"""
+
+        container = ttk.Frame()
+        container.pack(fill='both', expand=True)
+        header = ['field name', 'value']
+        # create a treeview with dual scrollbars
+        self.tree = ttk.Treeview(columns=header, show="headings")
+        vsb = ttk.Scrollbar(orient="vertical",
+                            command=self.tree.yview)
+        hsb = ttk.Scrollbar(orient="horizontal",
+                            command=self.tree.xview)
+        self.tree.configure(yscrollcommand=vsb.set,
+                            xscrollcommand=hsb.set)
+        self.tree.grid(column=0, row=0, sticky='nsew', in_=container)
+        vsb.grid(column=1, row=0, sticky='ns', in_=container)
+        hsb.grid(column=0, row=1, sticky='ew', in_=container)
+        container.grid_columnconfigure(0, weight=1)
+        container.grid_columnconfigure(1, weight=3)
+        container.grid_rowconfigure(0, weight=1)
+
+        for col in header:
+            self.tree.heading(col, text=col.title())
+
         self.languages = tk.StringVar(value=())
-        self.left = tk.Listbox(listvariable=self.languages)
-        self.left.pack()
+        self.field_list = tk.Listbox(listvariable=self.languages,
+                                     selectmode='multiple')
+        self.field_list.pack(side="top")
 
-        self.time_slider = tk.Scale(
-            length=WINDOW_WIDTH, from_=0, to=200, orient=tk.HORIZONTAL)
+        self.slider_label_frame = tk.Frame(self.root, bd=2, relief="ridge")
+        self.time_slider_label = tk.Label(
+            self.slider_label_frame, text="Time index slider:")
+        self.time_slider_label.pack(side="left")
+        self.slider_label_frame.pack(fill="x", side="top")
+
+        self.time_slider = tk.Scale(self.slider_label_frame,
+                                    length=WINDOW_WIDTH, from_=0, to=200,
+                                    orient=tk.HORIZONTAL)
         self.time_slider.bind("<ButtonRelease-1>", self.slider_changed)
-        self.time_slider.pack()
+        self.time_slider.pack(fill="x")
 
-        self.bt_new_fig = tk.Button(
-            text='Create new figure', command=self.create_new_figure)
-        self.bt_new_fig.pack()
+        self.btn_frame = tk.Frame(self.root, relief="ridge")
+        self.btn_frame.pack(fill="x")
+        self.new_fig_btn = tk.Button(self.btn_frame,
+                                     text='Create figure',
+                                     command=self.create_new_figure)
+        self.new_fig_btn.pack(side="left")
+        self.clear_list_btn = tk.Button(self.btn_frame, text="clear selection",
+                                        command=self.clear_selection)
+        self.clear_list_btn.pack(side="left")
+        # button3 = tk.Button(self.frame, text="終了")
+        # button3.pack(side="right")
 
         self.setup_status_bar()
 
     def setup_status_bar(self):
         self.status_bar_str = tkinter.StringVar()
-        self.status_bar = tkinter.Label(self.root, textvariable=self.status_bar_str,
+        self.status_bar = tkinter.Label(self.root,
+                                        textvariable=self.status_bar_str,
                                         bd=1, relief=tkinter.SUNKEN, anchor=tkinter.W)
         self.status_bar.pack(side=tkinter.BOTTOM, fill=tkinter.X)
         self.status_bar_str.set("")
@@ -132,58 +175,67 @@ class FigureManager():
     def __init__(self, parent, fnum):
         self.fig, self.ax = plt.subplots()
         self.parent = parent
-        self.x = None
-        self.y = None
+        self.x = []
+        self.x_field_names = []
+        self.y = []
+        self.y_field_names = []
         self.fig.canvas.mpl_connect('button_press_event', self.onclick)
         self.fig_num = fnum
 
         plt.pause(0.0001)
 
     def onclick(self, event):
-        print('event.button=%d,  event.x=%d, event.y=%d, event.xdata=%f, \
-            event.ydata=%f' % (event.button, event.x, event.y, event.xdata, event.ydata))
-        print(self.fig_num)
-        print(self.parent.selected_field)
-        self.set_data(self.parent.data[self.parent.selected_field],
-                      self.parent.selected_field)
 
-    def set_data(self, data, field_name):
+        if not self.parent.selected_fields:
+            self.parent.status_bar_str.set("Please click field")
+        else:
+            self.set_data(self.parent.data,
+                          self.parent.selected_fields)
+        self.parent.clear_selection()
+        self.parent.selected_fields = []
 
-        if self.x is None:
-            self.x = data
-            self.x_field_name = field_name
-        elif self.y is None:
-            self.y = data
-            self.y_field_name = field_name
+    def set_data(self, data, field_names):
 
+        if not self.x:
+            for fn in field_names:
+                self.x.append(data[fn])
+                self.x_field_names.append(fn)
+        elif not self.y:
+            for fn in field_names:
+                self.y.append(data[fn])
+                self.y_field_names.append(fn)
         self.plot()
 
     def plot(self):
         self.ax.cla()
 
-        if self.y is None:
-            time = [t for t in range(len(self.x))]
-            self.ax.plot(time, self.x, "-r")
-            self.ax.set_xlabel(self.x_field_name)
-            self.ax.grid(True)
-        else:
-            self.ax.plot(self.x, self.y, "-r")
-            self.ax.set_xlabel(self.x_field_name)
-            self.ax.set_ylabel(self.y_field_name)
-            self.ax.grid(True)
+        if not self.y:
+            for i in range(len(self.x)):
+                time = [t for t in range(len(self.x[i]))]
+                self.ax.plot(time, self.x[i],
+                             label=self.x_field_names[i])
+            self.ax.set_xlabel("Time index")
+            self.ax.legend()
+        elif len(self.x) == 1:
+            self.ax.plot(self.x[0], self.y[0], "-r")
+            self.ax.set_xlabel(self.x_field_names[0])
+            self.ax.set_ylabel(self.y_field_names[0])
 
+        self.ax.grid(True)
         plt.pause(0.01)
 
     def plot_time_line(self, time):
         self.plot()
-        if self.y is None:
+        if not self.y:
             self.ax.axvline(x=time)
-            self.ax.plot(time, self.x[time], "xk")
-            self.ax.text(time, self.x[time],
-                         '{:.3f}'.format(self.x[time])
-                         + ":" + self.x_field_name)
+
+            for i in range(len(self.x)):
+                self.ax.plot(time, self.x[i][time], "xk")
+                self.ax.text(time, self.x[i][time],
+                             '{:.3f}'.format(self.x[i][time]) +
+                             ":" + self.x_field_names[i])
         else:
-            self.ax.plot(self.x[time], self.y[time], "xk")
+            self.ax.plot(self.x[0][time], self.y[0][time], "xk")
         plt.pause(0.01)
 
 
