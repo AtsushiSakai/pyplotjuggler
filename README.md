@@ -18,11 +18,17 @@ This is inspired by [PlotJuggler](https://www.plotjuggler.io/)
 
 # How to install
 
-> pip install pyplotjuggler
+You can use pip:
+
+>$ pip install pyplotjuggler
 
 - [pyplotjuggler · PyPI](https://pypi.org/project/pyplotjuggler/)
 
 # How to use
+
+You can start pyplotjuggler with:
+
+>$ python -m pyplotjuggler
 
 # License 
 
@@ -31,6 +37,4 @@ MIT
 # Author
 
 Atsushi Sakai ([@Atsushi_twi](https://twitter.com/Atsushi_twi))
-
-
 
