@@ -17,7 +17,7 @@ except(IOError, ImportError):
 
 setup(
     name="pyplotjuggler",
-    version="0.1.1",
+    version="0.1.2",
     url="https://github.com/AtsushiSakai/pyplotjuggler",
     author="Atsushi Sakai",
     author_email="asakaig@gmail.com",
