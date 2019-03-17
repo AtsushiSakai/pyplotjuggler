@@ -151,7 +151,7 @@ class pyplotjuggler(ttk.Frame):
 
     def load_file(self):
         ftyp = [("CSV", "*.csv")]
-        idir = os.path.abspath(os.path.dirname(__file__) + "../")
+        idir = os.path.abspath("./")
         fpath = tkinter.filedialog.askopenfilename(
             filetypes=ftyp, initialdir=idir)
 
@@ -291,8 +291,8 @@ class FigureManager():
             for i in range(len(self.x)):
                 self.ax.plot(time, self.x[i][time], "xk")
                 self.ax.text(time, self.x[i][time],
-                             '{:.3f}'.format(self.x[i][time]) +
-                             ":" + self.x_field_names[i])
+                             '{:.3f}'.format(self.x[i][time])
+                             + ":" + self.x_field_names[i])
         else:
             self.ax.plot(self.x[0][time], self.y[0][time], "xk")
 
