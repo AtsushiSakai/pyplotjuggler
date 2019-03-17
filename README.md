@@ -1,7 +1,8 @@
 # pyplotjuggler
-Python plot juggler
 
-Inspired [PlotJuggler](https://www.plotjuggler.io/)
+A Python visualization tool for timeseries data.
+
+This is inspired by [PlotJuggler](https://www.plotjuggler.io/)
 
 # Demo
 
@@ -9,6 +10,19 @@ Inspired [PlotJuggler](https://www.plotjuggler.io/)
 
 # Requirements
 
+- Python 3.6.x (2.7 is not supported)
+
+- matplotlib
+
+- pandas
+
+# How to install
+
+> pip install pyplotjuggler
+
+- [pyplotjuggler · PyPI](https://pypi.org/project/pyplotjuggler/)
+
+# How to use
 
 # License 
 
