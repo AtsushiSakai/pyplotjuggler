@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 SIM_DT = 0.01
 PLOT_DT = 0.00001
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 
 
 class pyplotjuggler(ttk.Frame):
@@ -174,7 +174,7 @@ class pyplotjuggler(ttk.Frame):
         msg = """
         pyplotjuggler
         by Atsushi Sakai(@Atsushi_twi)
-        Ver. 0.1
+        Ver.""" + VERSION + """\n
         GitHub:https://github.com/AtsushiSakai/pyplotjuggler
         """
         messagebox.showinfo("About", msg)
@@ -290,8 +290,8 @@ class FigureManager():
             for i in range(len(self.x)):
                 self.ax.plot(time, self.x[i][time], "xk")
                 self.ax.text(time, self.x[i][time],
-                             '{:.3f}'.format(self.x[i][time]) +
-                             ":" + self.x_field_names[i])
+                             '{:.3f}'.format(self.x[i][time])
+                             + ":" + self.x_field_names[i])
         else:
             self.ax.plot(self.x[0][time], self.y[0][time], "xk")
 
