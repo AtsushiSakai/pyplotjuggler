@@ -8,6 +8,8 @@ How to upload new release
 """
 from setuptools import setup, find_packages
 
+from pyplotjuggler import pyplotjuggler
+
 # read README
 try:
     import pypandoc
@@ -17,7 +19,7 @@ except(IOError, ImportError):
 
 setup(
     name="pyplotjuggler",
-    version="0.1.2",
+    version=pyplotjuggler.VERSION,
     url="https://github.com/AtsushiSakai/pyplotjuggler",
     author="Atsushi Sakai",
     author_email="asakaig@gmail.com",

@@ -14,10 +14,9 @@ import tkinter.filedialog
 import pandas as pd
 import matplotlib.pyplot as plt
 
-WINDOW_WIDTH = 400
-WINDOW_HEIGHT = 300
 SIM_DT = 0.01
 PLOT_DT = 0.00001
+VERSION = "0.1.3"
 
 
 class pyplotjuggler(ttk.Frame):
@@ -32,7 +31,6 @@ class pyplotjuggler(ttk.Frame):
         self.max_time = 200
         self.time_started = False
         self.initialize_widgets()
-        self.root.geometry(str(WINDOW_WIDTH) + "x" + str(WINDOW_HEIGHT))
         root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def initialize_widgets(self):
@@ -94,7 +92,7 @@ class pyplotjuggler(ttk.Frame):
         self.slider_label_frame.pack(fill="x", side="top")
 
         self.time_slider = tk.Scale(self.slider_label_frame,
-                                    length=WINDOW_WIDTH, from_=0,
+                                    from_=0,
                                     to=self.max_time,
                                     orient=tk.HORIZONTAL)
         self.time_slider.bind("<ButtonRelease-1>", self.slider_changed)
@@ -241,6 +239,7 @@ class FigureManager():
         self.fig.canvas.mpl_connect('button_press_event', self.on_click)
         self.fig_num = fnum
 
+        self.ax.grid(True)
         plt.pause(PLOT_DT)
 
     def on_click(self, event):
@@ -291,8 +290,8 @@ class FigureManager():
             for i in range(len(self.x)):
                 self.ax.plot(time, self.x[i][time], "xk")
                 self.ax.text(time, self.x[i][time],
-                             '{:.3f}'.format(self.x[i][time])
-                             + ":" + self.x_field_names[i])
+                             '{:.3f}'.format(self.x[i][time]) +
+                             ":" + self.x_field_names[i])
         else:
             self.ax.plot(self.x[0][time], self.y[0][time], "xk")
 
