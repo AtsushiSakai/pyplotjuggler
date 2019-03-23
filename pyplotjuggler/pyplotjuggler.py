@@ -13,15 +13,16 @@ import tkinter.ttk as ttk
 import tkinter.filedialog
 import pandas as pd
 import matplotlib.pyplot as plt
+import argparse
 
 SIM_DT = 0.01
 PLOT_DT = 0.00001
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 
 
 class pyplotjuggler(ttk.Frame):
 
-    def __init__(self, root):
+    def __init__(self, root, args):
         super().__init__(root)
         self.root = root
         self.figs = []
@@ -29,9 +30,25 @@ class pyplotjuggler(ttk.Frame):
         self.selected_fields = []
         self.time = 0
         self.max_time = 200
+        self.args = args
         self.time_started = False
         self.initialize_widgets()
-        root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.root.title('PyPlotJuggler')
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.setup_with_args()
+
+    def setup_with_args(self):
+        self.idir = os.path.abspath("./")
+        if self.args.dir:
+            self.idir = self.args.dir
+
+        if self.args.open:
+            self.load_file()
+
+        if self.args.file:
+            self.setup_csv_file(self.args.file)
 
     def initialize_widgets(self):
         self.setup_field_list()
@@ -149,15 +166,21 @@ class pyplotjuggler(ttk.Frame):
 
     def load_file(self):
         ftyp = [("CSV", "*.csv")]
-        idir = os.path.abspath("./")
         fpath = tkinter.filedialog.askopenfilename(
-            filetypes=ftyp, initialdir=idir)
+            filetypes=ftyp, initialdir=self.idir)
 
         if not fpath:
             self.status_bar_str.set("Please select a file")
             return
 
-        self.data = pd.read_csv(fpath)
+        if "csv" in fpath:
+            self.setup_csv_file(fpath)
+
+    def setup_csv_file(self, csv_path):
+        self.data = pd.read_csv(csv_path)
+        self.setup_loaded_data()
+
+    def setup_loaded_data(self):
 
         # insert data columns
         for name in self.data.columns:
@@ -290,8 +313,8 @@ class FigureManager():
             for i in range(len(self.x)):
                 self.ax.plot(time, self.x[i][time], "xk")
                 self.ax.text(time, self.x[i][time],
-                             '{:.3f}'.format(self.x[i][time])
-                             + ":" + self.x_field_names[i])
+                             '{:.3f}'.format(self.x[i][time]) +
+                             ":" + self.x_field_names[i])
         else:
             self.ax.plot(self.x[0][time], self.y[0][time], "xk")
 
@@ -299,9 +322,16 @@ class FigureManager():
 def main():
     """main"""
     print("start!!")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--file', type=str, help='file path')
+    parser.add_argument('-d', '--dir', type=str,
+                        help='file directory')
+    parser.add_argument('-o', '--open', action='store_true',
+                        default=False, help='Open with finder')
+    args = parser.parse_args()
+
     root = tk.Tk()
-    root.title('PyPlotJuggler')
-    app = pyplotjuggler(root)
+    app = pyplotjuggler(root, args)
     root.mainloop()
 
     print("done!!")
