@@ -30,6 +30,18 @@ You can start pyplotjuggler with:
 
 >$ python -m pyplotjuggler
 
+See the demo gif.
+
+## Command line options
+
+- -h, --help            show this help message and exit
+
+- -f FILE, --file FILE  file path for data loading
+
+- -d DIR, --dir DIR     file directory for data loading
+
+- -o, --open            Open with finder
+
 # License 
 
 MIT
